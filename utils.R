@@ -60,6 +60,24 @@ make.world.population <- function(file = NULL, country)
     return(world.population)
 }
 
+make.usa.population <- function(file = NULL, country)
+{
+    usa.population <- read.delim(
+        file = file,
+        sep = "\t",
+        head = TRUE,
+        stringsAsFactors = FALSE
+    )
+    
+    usa.population <- data.frame(
+        country = usa.population[, 1],
+        population = usa.population$X2019,
+        stringsAsFactors = FALSE
+    )
+
+    return(usa.population)
+}
+
 make.covid.agg <-
     function(covid.file = NULL, group = "Country.Region")
     {
@@ -89,13 +107,15 @@ make.covid.agg <-
                 stringsAsFactors = FALSE,
                 sep = ","
             )
-        
+        ### list of columns to delete
+        ind.del <- grep("^X[0-9]", names(covid), invert = TRUE)
+
         ### aggregate values by country
         covid.agg <-
-            rowsum(covid[,-c(1:4)], group = covid$Country.Region)
+            rowsum(covid[,-ind.del], group = covid[,group])
         
         ### date (MM/DD/YYYY)
-        covid.date <- t(covid.header[1,-c(1:4)])
+        covid.date <- t(covid.header[1,-ind.del])
         
         ######################################################################################
         ### data.frame with country, date, death with number of death per day (cumul per day)
@@ -375,24 +395,30 @@ fitLogistic <- function(daily.cumulative.death = NULL,
         
         
         ### normalize time with a number of deaths equals to deaths.ref
-        #deaths.ref <- 2 * country.population[country.ref, "population"] / 10^6 * country.population[country, "population"] / country.population[country.ref, "population"]
         deaths.ref <-
             2 *  country.population[country, "population"] / 10 ^ 6
         death.country <- death.country[order(death.country$date),]
-        ind.ref1 <- max(which(death.country$death < deaths.ref))
-        ind.ref2 <- ind.ref1 + 1
-        if (ind.ref2 > nb.obs)
+
+        if(deaths.ref < min(death.country$death, na.rm = TRUE))
         {
-            time.norm <- max(death.country$time)
+            time.norm <- death.country$time[1]
         } else
         {
-            y1 <- death.country$death[ind.ref1]
-            y2 <- death.country$death[ind.ref2]
-            x1 <- death.country$time[ind.ref1]
-            x2 <- death.country$time[ind.ref2]
-            a.slope <- (y2 - y1) / (x2 - x1)
-            b.coef <- y1 - a.slope * x1
-            time.norm <- (deaths.ref - b.coef) / a.slope
+            ind.ref1 <- max(which(death.country$death < deaths.ref))
+            ind.ref2 <- ind.ref1 + 1
+            if (ind.ref2 > nb.obs)
+            {
+                time.norm <- max(death.country$time)
+            } else
+            {
+                y1 <- death.country$death[ind.ref1]
+                y2 <- death.country$death[ind.ref2]
+                x1 <- death.country$time[ind.ref1]
+                x2 <- death.country$time[ind.ref2]
+                a.slope <- (y2 - y1) / (x2 - x1)
+                b.coef <- y1 - a.slope * x1
+                time.norm <- (deaths.ref - b.coef) / a.slope
+            }
         }
         
         death.country$time.norm <- death.country$time - time.norm

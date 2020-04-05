@@ -109,20 +109,30 @@ data.dir <- "data/COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 covid.file <-
   paste(data.dir, "time_series_covid19_deaths_global.csv", sep = "")
 
+covid.us.file <-
+  paste(data.dir, "time_series_covid19_deaths_US.csv", sep = "")
+
+### data for all countries over the world
+world.data <- make.covid.agg(covid.file = covid.file)
+daily.cumulative.death <- world.data[["daily.cumulative.death"]]
+total.death <- world.data[["total.death"]]
+daily.death <- world.data[["daily.death"]]
 
 
-daily.cumulative.death <-
-  make.covid.agg(covid.file = covid.file)[["daily.cumulative.death"]]
-total.death <-
-  make.covid.agg(covid.file = covid.file)[["total.death"]]
-daily.death <-
-  make.covid.agg(covid.file = covid.file)[["daily.death"]]
+### data for all states over USA
+usa.data <- make.covid.agg(covid.file = covid.us.file, group = "Province_State")
+usa.daily.cumulative.death <- usa.data[["daily.cumulative.death"]]
+usa.total.death <- usa.data[["total.death"]]
+usa.daily.death <- usa.data[["daily.death"]]
 
 ### Adjust data for France as ehpad cases were not counted until 04/02/20"
 france.adjusted <- adjust.france(daily.cumulative.death[which(daily.cumulative.death$country == "France"),])
 daily.cumulative.death <- rbind(daily.cumulative.death, france.adjusted)
 
-### population number
+
+#####################################
+### population number for countries
+#####################################
 world.population.file <-
   "data/WPP2019_POP_F01_1_TOTAL_POPULATION_BOTH_SEXES.tsv"
 country.population <-
@@ -132,14 +142,25 @@ rownames(country.population) <- country.population$country
 country.no.pop.size <-
   setdiff(unique(daily.cumulative.death$country),
           country.population$country)
+
 if (length(country.no.pop.size) > 0)
 {
   daily.cumulative.death <-
     daily.cumulative.death[-which(daily.cumulative.death$country %in% country.no.pop.size), ]
 }
 
-#<- read.delim(file = "data/population.tsv", row.names = 1, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-#country.population <- data.frame(country.population, country = rownames(country.population), stringsAsFactors = FALSE)
+######################################
+### population number for USA states
+######################################
+
+usa.population.file <-
+  "data/nst-est2019-01.tsv"
+usa.population <-
+  make.usa.population(file = usa.population.file) 
+rownames(usa.population) <- usa.population$country
+
+usa.daily.cumulative.death <- usa.daily.cumulative.death[which(usa.daily.cumulative.death$country %in% usa.population$country),]
+
 
 ### number of deaths all over the world
 dd.world <-
@@ -158,19 +179,32 @@ confinement.date$death.norm <-
   confinement.date$death / confinement.date$population * 10 ^ 6
 rownames(confinement.date) <- confinement.date$country
 
-### Top 10 countries
-top.countries <- total.death$country[1:11]
+############
+### World
+############
 
+### Top countries
+top.countries <- total.death$country[1:11]
 
 ### countries of interest
 countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan", "France (adjusted)"))
 
+###########
+### USA
+###########
+
+### Top USA states
+usa.top.countries <- usa.total.death$country[1:11]
+
+### USA states of interest
+usa.countries.of.interest <- usa.top.countries
 
 y.lim.max <- 30000
+usa.y.lim.max <- 6000
 max.date.pred <- as.Date("05/01/20", format = "%m/%d/%y")
 
 ###################################
-### prediction model
+### prediction model (world)
 ###################################
 res.prediction <-
   fitLogistic(
@@ -190,6 +224,24 @@ confinement.date <- res.prediction[["confinement.date"]]
 confinement.date.top <-
   confinement.date[which(confinement.date$country %in% countries.of.interest), ]
 
+###################################
+### prediction model (USA)
+###################################
+usa.confinement.date <- NULL
+usa.res.prediction <-
+  fitLogistic(
+    daily.cumulative.death = usa.daily.cumulative.death,
+    country.population = usa.population,
+    countries.of.interest = usa.countries.of.interest,
+    confinement.date = usa.confinement.date,
+    y.lim.max = usa.y.lim.max,
+    max.date.pred = max.date.pred
+  )
+
+usa.death.prediction <- usa.res.prediction[["death.prediction"]]
+usa.confint.all <- usa.res.prediction[["confint.all"]]
+usa.pic.value.all <- usa.res.prediction[["pic.value.all"]]
+usa.confinement.date <- usa.res.prediction[["confinement.date"]]
 
 ###################################
 ### graphics
