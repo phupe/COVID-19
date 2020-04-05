@@ -1,0 +1,199 @@
+require(plotly)
+require(ggplot2)
+require(scales)
+require(nlstools)
+require(investr)
+require(nls2)
+require(propagate)
+require(minpack.lm)
+require(RColorBrewer)
+
+rm(list = ls())
+
+source("utils.R")
+
+#########################################
+### Addtional information
+#########################################
+
+### confinement dates
+# rep tcheque 13 mars
+# nouvelle zealand 23 mars
+# malaisie 18 mars
+# afrique du sud 27 mars
+# zimbawe 27 mars
+# Tunisia 20 mars
+# Marco 21 mars
+# salvador 21 mars
+# colombie 24 mars
+# venezuela 17 mars
+# bolivia 22 mars
+# argentine 19 mars
+confinement.date <- NULL
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "Austria",
+          date = as.Date("03/15/20", format = "%m/%d/%y")
+        ))
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "Belgium",
+          date = as.Date("03/18/20", format = "%m/%d/%y")
+        ))
+confinement.date <-
+  rbind(confinement.date, data.frame(
+    country = "China",
+    date = as.Date("01/22/20", format = "%m/%d/%y")
+  ))
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "Denmark",
+          date = as.Date("03/13/20", format = "%m/%d/%y")
+        ))
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "France",
+          date = as.Date("03/17/20", format = "%m/%d/%y")
+        ))
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "Greece",
+          date = as.Date("03/23/20", format = "%m/%d/%y")
+        ))
+confinement.date <-
+  rbind(confinement.date, data.frame(
+    country = "India",
+    date = as.Date("03/24/20", format = "%m/%d/%y")
+  ))
+confinement.date <-
+  rbind(confinement.date, data.frame(
+    country = "Italy",
+    date = as.Date("03/08/20", format = "%m/%d/%y")
+  ))
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "Portugal",
+          date = as.Date("03/19/20", format = "%m/%d/%y")
+        ))
+confinement.date <-
+  rbind(confinement.date,
+        data.frame(
+          country = "Romania",
+          date = as.Date("03/25/20", format = "%m/%d/%y")
+        ))
+#confinement.date <- rbind(confinement.date, data.frame(country = "Russia", date = as.Date("03/30/20", format="%m/%d/%y")))
+confinement.date <-
+  rbind(confinement.date, data.frame(
+    country = "Spain",
+    date = as.Date("03/14/20", format = "%m/%d/%y")
+  ))
+confinement.date <-
+  rbind(confinement.date, data.frame(
+    country = "UK",
+    date = as.Date("03/23/20", format = "%m/%d/%y")
+  ))
+
+
+##############################################
+### source data from:
+### https://github.com/CSSEGISandData/COVID-19
+###############################################
+
+data.dir <- "data/COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
+covid.file <-
+  paste(data.dir, "time_series_covid19_deaths_global.csv", sep = "")
+
+
+
+daily.cumulative.death <-
+  make.covid.agg(covid.file = covid.file)[["daily.cumulative.death"]]
+total.death <-
+  make.covid.agg(covid.file = covid.file)[["total.death"]]
+daily.death <-
+  make.covid.agg(covid.file = covid.file)[["daily.death"]]
+
+### Adjust data for France as ehpad cases were not counted until 04/02/20"
+france.adjusted <- adjust.france(daily.cumulative.death[which(daily.cumulative.death$country == "France"),])
+daily.cumulative.death <- rbind(daily.cumulative.death, france.adjusted)
+
+### population number
+world.population.file <-
+  "data/WPP2019_POP_F01_1_TOTAL_POPULATION_BOTH_SEXES.tsv"
+country.population <-
+  make.world.population(file = world.population.file)
+rownames(country.population) <- country.population$country
+
+country.no.pop.size <-
+  setdiff(unique(daily.cumulative.death$country),
+          country.population$country)
+if (length(country.no.pop.size) > 0)
+{
+  daily.cumulative.death <-
+    daily.cumulative.death[-which(daily.cumulative.death$country %in% country.no.pop.size), ]
+}
+
+#<- read.delim(file = "data/population.tsv", row.names = 1, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+#country.population <- data.frame(country.population, country = rownames(country.population), stringsAsFactors = FALSE)
+
+### number of deaths all over the world
+dd.world <-
+  aggregate(daily.cumulative.death["death"],
+            by = list(date = daily.cumulative.death$date),
+            sum)
+dd.world$time <- as.numeric(dd.world$date)
+dd.world$time <- dd.world$time - min(dd.world$time)
+
+### additional information
+confinement.date <- merge(confinement.date, daily.cumulative.death)
+confinement.date$time <- as.numeric(confinement.date$date)
+confinement.date$time.norm <- NA
+confinement.date <- merge(confinement.date, country.population)
+confinement.date$death.norm <-
+  confinement.date$death / confinement.date$population * 10 ^ 6
+rownames(confinement.date) <- confinement.date$country
+
+### Top 10 countries
+top.countries <- total.death$country[1:11]
+
+
+### countries of interest
+countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan", "France (adjusted)"))
+
+
+y.lim.max <- 30000
+max.date.pred <- as.Date("05/01/20", format = "%m/%d/%y")
+
+###################################
+### prediction model
+###################################
+res.prediction <-
+  fitLogistic(
+    daily.cumulative.death = daily.cumulative.death,
+    country.population = country.population,
+    countries.of.interest = countries.of.interest,
+    confinement.date = confinement.date,
+    y.lim.max = y.lim.max,
+    max.date.pred = max.date.pred
+  )
+
+death.prediction <- res.prediction[["death.prediction"]]
+confint.all <- res.prediction[["confint.all"]]
+pic.value.all <- res.prediction[["pic.value.all"]]
+confinement.date <- res.prediction[["confinement.date"]]
+
+confinement.date.top <-
+  confinement.date[which(confinement.date$country %in% countries.of.interest), ]
+
+
+###################################
+### graphics
+###################################
+
+source("plot.R")
+
