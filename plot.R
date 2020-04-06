@@ -11,14 +11,12 @@ myPalette <- colorRampPalette(brewer.pal(12, "Paired"))
 title.prediction <-
   paste(
     format(max(daily.cumulative.death$date), format = "%Y %B %d"),
-    ". The peak of the epidemic = triangle. Confinement date = circle with an X. ",
-    "data from https://github.com/CSSEGISandData/COVID-19."
-  )
+    " - Observed and predicted values with confidence intervals. Estimated date of the peak of the epidemic = triangle. Confinement date = circle with an X. ")
 
 title.prediction.norm <-
   paste(
     format(max(daily.cumulative.death$date), format = "%Y %B %d"),
-    "Normalized data by population size of the country. Time 0 is ~2 deaths for 1 million.",
+    " - Normalized data by population size of the country. Time 0 is ~2 deaths for 1 million.",
     "data from https://github.com/CSSEGISandData/COVID-19."
   )
 
@@ -206,9 +204,7 @@ htmlwidgets::saveWidget(plot.daily.death, "daily.html", selfcontained = FALSE, l
 usa.title.prediction <-
   paste(
     format(max(daily.cumulative.death$date), format = "%Y %B %d"),
-    ". USA - The peak of the epidemic = triangle. ",
-    "data from https://github.com/CSSEGISandData/COVID-19."
-  )
+    " - USA - Observed and predicted values with confidence intervals. Estimated date of the peak of the epidemic = triangle. Confinement date = circle with an X. ")
 
 usa.title.prediction.norm <-
   paste(
