@@ -371,6 +371,8 @@ fitLogistic <- function(daily.cumulative.death = NULL,
                 lower = floor(l.u.int.values$summary$Prop.2.5),
                 upper = floor(l.u.int.values$summary$Prop.97.5)
             )
+
+        ### modify the values to have better rendering in ggplot graphics
         ind.upper <- which(l.u.int$upper > y.lim.max)
         if (length(ind.upper) == nrow(death.country))
         {
@@ -390,6 +392,11 @@ fitLogistic <- function(daily.cumulative.death = NULL,
         if(length(ind.lower) == nrow(death.country) | length(ind.upper) == nrow(death.country))
         {
             l.u.int$lower <- l.u.int$upper <- NA
+        }
+        ind.inconsistent <- which(l.u.int$lower > l.u.int$upper)
+        if(length(ind.inconsistent) > 0)
+        {
+            l.u.int$lower[ind.inconsistent] <- max(l.u.int$upper)
         }
         death.country <- cbind(death.country, l.u.int)
         
