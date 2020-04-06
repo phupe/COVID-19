@@ -7,6 +7,7 @@ require(nls2)
 require(propagate)
 require(minpack.lm)
 require(RColorBrewer)
+require(htmlwidgets)
 
 rm(list = ls())
 

@@ -186,12 +186,18 @@ plot.absolute <-
   subplot(format.legend.ggplotly(ggplotly(p.prediction)),
           style(format.legend.ggplotly(ggplotly(p.prediction.log)), showlegend = FALSE),
           nrows = 2)
+htmlwidgets::saveWidget(plot.absolute, "absolute.html", selfcontained = FALSE, libdir = "lib")
+
 plot.norm <-
   subplot(format.legend.ggplotly(ggplotly(p.prediction.norm)),
           style(format.legend.ggplotly(ggplotly(p.prediction.log.norm)), showlegend = FALSE),
           nrows = 2)
 
+htmlwidgets::saveWidget(plot.norm, "normalized.html", selfcontained = FALSE, libdir = "lib")
+
 plot.daily.death <- (ggplotly(p.daily.death))
+
+htmlwidgets::saveWidget(plot.daily.death, "daily.html", selfcontained = FALSE, libdir = "lib")
 
 ##########
 ### USA
@@ -344,9 +350,16 @@ usa.plot.absolute <-
   subplot(format.legend.ggplotly(ggplotly(usa.p.prediction)),
           style(format.legend.ggplotly(ggplotly(usa.p.prediction.log)), showlegend = FALSE),
           nrows = 2)
+
+htmlwidgets::saveWidget(usa.plot.absolute, "usa.absolute.html", selfcontained = FALSE, libdir = "lib")
+
 usa.plot.norm <-
   subplot(format.legend.ggplotly(ggplotly(usa.p.prediction.norm)),
           style(format.legend.ggplotly(ggplotly(usa.p.prediction.log.norm)), showlegend = FALSE),
           nrows = 2)
 
+htmlwidgets::saveWidget(usa.plot.norm, "usa.normalized.html", selfcontained = FALSE, libdir = "lib")
+
 usa.plot.daily.death <- (ggplotly(usa.p.daily.death))
+
+htmlwidgets::saveWidget(usa.plot.daily.death, "usa.daily.html", selfcontained = FALSE, libdir = "lib")
