@@ -188,7 +188,7 @@ rownames(confinement.date) <- confinement.date$country
 top.countries <- total.death$country[1:11]
 
 ### countries of interest
-countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan", "France (adjusted)"))
+countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan"))
 
 ###########
 ### USA
