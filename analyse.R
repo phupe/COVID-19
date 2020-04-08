@@ -128,7 +128,7 @@ usa.daily.death <- usa.data[["daily.death"]]
 
 ### Adjust data for France as ehpad cases were not counted until 04/02/20"
 france.adjusted <- adjust.france(daily.cumulative.death[which(daily.cumulative.death$country == "France"),])
-daily.cumulative.death <- rbind(daily.cumulative.death, france.adjusted)
+# daily.cumulative.death <- rbind(daily.cumulative.death, france.adjusted)
 
 
 #####################################
