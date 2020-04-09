@@ -89,7 +89,7 @@ htmlwidgets::saveWidget(p.prediction,
                         selfcontained = FALSE,
                         libdir = "lib")
 
-htmlwidgets::saveWidget(p.prediction,
+htmlwidgets::saveWidget(p.prediction.log,
                         "absolute.log.html",
                         selfcontained = FALSE,
                         libdir = "lib")
@@ -204,7 +204,7 @@ htmlwidgets::saveWidget(
 )
 
 htmlwidgets::saveWidget(
-  usa.p.prediction,
+  usa.p.prediction.log,
   "usa.absolute.log.html",
   selfcontained = FALSE,
   libdir = "lib"
