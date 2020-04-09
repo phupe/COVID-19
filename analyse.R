@@ -201,7 +201,7 @@ usa.top.countries <- usa.total.death$country[1:11]
 usa.countries.of.interest <- usa.top.countries
 
 y.lim.max <- 30000
-usa.y.lim.max <- 10000
+usa.y.lim.max <- 11000
 max.date.pred <- as.Date("05/01/20", format = "%m/%d/%y")
 
 ###################################
