@@ -414,6 +414,45 @@ plot.daily.death <- function(daily.death = NULL,
   return(ggplotly(p.daily.death))
 }
 
+
+### modify the values to have better rendering in ggplot graphics
+### for the confidence intervals
+
+adjust.confint.4plot <- function(l.u.int = NULL,
+                                death.country = NULL,
+                                y.lim.max = NULL)
+{
+    ind.upper <- which(l.u.int$upper > y.lim.max)
+    if (length(ind.upper) == nrow(death.country))
+    {
+      l.u.int$upper[ind.upper] <- NA
+    } else
+    {
+      l.u.int$upper[ind.upper] <- y.lim.max
+    }
+    ind.lower <- which(l.u.int$lower < 0)
+    if (length(ind.lower) == nrow(death.country))
+    {
+      l.u.int$lower[ind.lower] <- NA
+    } else
+    {
+      l.u.int$lower[ind.lower] <- 1
+    }
+    if (length(ind.lower) == nrow(death.country) |
+        length(ind.upper) == nrow(death.country))
+    {
+      l.u.int$lower <- l.u.int$upper <- NA
+    }
+    ind.inconsistent <- which(l.u.int$lower > l.u.int$upper)
+    if (length(ind.inconsistent) > 0)
+    {
+      l.u.int$lower[ind.inconsistent] <- max(l.u.int$upper)
+    }
+    death.country <- cbind(death.country, l.u.int)
+
+    return(death.country)
+
+}
 ##########################
 ### statistical analysis
 ##########################
@@ -551,34 +590,9 @@ fitLogistic <- function(daily.cumulative.death = NULL,
       )
     
     ### modify the values to have better rendering in ggplot graphics
-    ind.upper <- which(l.u.int$upper > y.lim.max)
-    if (length(ind.upper) == nrow(death.country))
-    {
-      l.u.int$upper[ind.upper] <- NA
-    } else
-    {
-      l.u.int$upper[ind.upper] <- y.lim.max
-    }
-    ind.lower <- which(l.u.int$lower < 0)
-    if (length(ind.lower) == nrow(death.country))
-    {
-      l.u.int$lower[ind.lower] <- NA
-    } else
-    {
-      l.u.int$lower[ind.lower] <- 1
-    }
-    if (length(ind.lower) == nrow(death.country) |
-        length(ind.upper) == nrow(death.country))
-    {
-      l.u.int$lower <- l.u.int$upper <- NA
-    }
-    ind.inconsistent <- which(l.u.int$lower > l.u.int$upper)
-    if (length(ind.inconsistent) > 0)
-    {
-      l.u.int$lower[ind.inconsistent] <- max(l.u.int$upper)
-    }
-    death.country <- cbind(death.country, l.u.int)
-    
+    death.country <- adjust.confint.4plot(l.u.int = l.u.int,
+                                          death.country = death.country,
+                                          y.lim.max = y.lim.max)
     
     ### normalize time with a number of deaths equals to deaths.ref
     deaths.ref <-
