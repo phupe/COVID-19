@@ -185,7 +185,7 @@ rownames(confinement.date) <- confinement.date$country
 ############
 
 ### Top countries
-top.countries <- total.death$country[1:11]
+top.countries <- total.death$country[1:13]
 
 ### countries of interest
 countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan"))
@@ -195,12 +195,12 @@ countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan"))
 ###########
 
 ### Top USA states
-usa.top.countries <- usa.total.death$country[1:11]
+usa.top.countries <- usa.total.death$country[1:13]
 
 ### USA states of interest
 usa.countries.of.interest <- usa.top.countries
 
-y.lim.max <- 30000
+y.lim.max <- 32500
 usa.y.lim.max <- 11000
 max.date.pred <- as.Date("05/01/20", format = "%m/%d/%y")
 

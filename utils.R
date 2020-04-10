@@ -377,13 +377,13 @@ plot.prediction.norm <- function(death.prediction = NULL,
   {
     p.prediction.norm <-
       p.prediction.norm + scale_y_continuous(n.breaks = 15,
-                                             limits = c(0, 350))
+                                             limits = c(0, 450))
   } else
   {
     p.prediction.norm <- p.prediction.norm + scale_y_continuous(
       trans = "log2",
       breaks = 2 ^ (-6:9),
-      limits = c(0.01, 350)
+      limits = c(0.01, 450)
     )
   }
   
