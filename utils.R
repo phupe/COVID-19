@@ -537,6 +537,7 @@ add.extra.date <- function(death.country = NULL,
                    country = rep(death.country$country[1], length(extra.date)),
                    date = extra.date,
                    death = NA,
+                   death.norm = NA,
                    time = as.numeric(extra.date) - min.time,
                    stringsAsFactors = FALSE
                    )
@@ -562,8 +563,8 @@ compute.confint <- function(fit.res.nls = NULL,
                       do.sim = FALSE)
     l.u.int <-
         data.frame(
-                   lower = floor(l.u.int.values$summary$Prop.2.5),
-                   upper = floor(l.u.int.values$summary$Prop.97.5)
+                   lower = l.u.int.values$summary$Prop.2.5,
+                   upper = l.u.int.values$summary$Prop.97.5
                    )
 
     return(l.u.int)
@@ -572,20 +573,23 @@ compute.confint <- function(fit.res.nls = NULL,
 
 ### richards model (Generalised logistic function)
 fitRichards <- function(death.country = NULL,
+                        population.size = NULL,
                         min.time = NULL)
 {
 
+        death.country <- norm.pop.size(death.country = death.country,
+                                       population.size = population.size)
         params.grid <-
             expand.grid(
-                        Asym = c(100, seq(1000, 30000, 1000)),
-                        xmid = seq(10, 100, 4),
-                        scal = seq(2, 8, 1),
+                        Asym = c(1, seq(10, 1100, 100)),
+                        xmid = seq(10, 100, 2),
+                        scal = seq(2, 10, 0.5),
                         nu = seq(0.1, 5.1, 1)
                         )
         cat("fit with brute force\n")
         fit.res <-
             nls2(
-                 death ~ Asym/(1 + nu * exp((xmid - time)/scal))^(1/nu),
+                 death.norm ~ Asym/(1 + nu * exp((xmid - time)/scal))^(1/nu),
                  data = death.country,
                  algorithm = "brute-force",
                  start = params.grid
@@ -597,7 +601,7 @@ fitRichards <- function(death.country = NULL,
         cat("fit with previous model as start value\n")
         fit.res <-
             nlsLM(
-                  death ~ Asym/(1 + nu * exp((xmid - time)/scal))^(1/nu),
+                  death.norm ~ Asym/(1 + nu * exp((xmid - time)/scal))^(1/nu),
                   data = death.country,
                   start = list(
                                Asym = Asym0,
@@ -620,7 +624,7 @@ fitRichards <- function(death.country = NULL,
                                         min.time = min.time,
                                         nb.obs = 20)
 
-        death.country$prediction <-
+        death.country$prediction.norm <-
             floor(Asym/(1 + nu * exp((xmid - death.country$time)/scal))^(1/nu))
 
         ### confidence intervals for the parameters
@@ -639,6 +643,13 @@ fitRichards <- function(death.country = NULL,
         l.u.int <- compute.confint(fit.res.nls = fit.res,
                                    death.country = death.country)
 
+        ### inverse value to population size
+        death.country$prediction <- norm.pop.size.inv(value = death.country$prediction.norm,
+                                                      population.size = population.size)
+        l.u.int$lower <- norm.pop.size.inv(value = l.u.int$lower,
+                                           population.size = population.size)
+        l.u.int$upper <- norm.pop.size.inv(value = l.u.int$upper,
+                                           population.size = population.size)
 
         ### modify the values to have better rendering in ggplot graphics
         death.country <- adjust.confint.4plot(l.u.int = l.u.int,
@@ -651,18 +662,22 @@ fitRichards <- function(death.country = NULL,
 
 ### logistic model (sigmoid function)
 fitLogistic <- function(death.country = NULL,
+                        population.size = NULL,
                         min.time = NULL)
 {
+        death.country <- norm.pop.size(death.country = death.country,
+                                       population.size = population.size)
+
         params.grid <-
             expand.grid(
-                        Asym = c(100, seq(1000, 30000, 500)),
+                        Asym = c(1, seq(10, 1100, 100)),
                         xmid = seq(10, 100, 2),
-                        scal = seq(2, 8, 0.5)
+                        scal = seq(2, 10, 0.5)
                         )
         cat("fit with brute force\n")
         fit.res.logis0 <-
             nls2(
-                 death ~ Asym / ((1 + exp((xmid - time) / scal
+                 death.norm ~ Asym / ((1 + exp((xmid - time) / scal
                                           ))),
                  data = death.country,
                  algorithm = "brute-force",
@@ -671,10 +686,12 @@ fitLogistic <- function(death.country = NULL,
         Alogis0 <- coefficients(fit.res.logis0)["Asym"]
         xmid0 <- coefficients(fit.res.logis0)["xmid"]
         scal0 <- coefficients(fit.res.logis0)["scal"]
+        cat("\tAsym: ", Alogis0, " xmid: ", xmid0, " scal: ", scal0, "\n")
+
         cat("fit with previous model as start value\n")
         fit.res.logis <-
             nlsLM(
-                  death ~ Asym / ((1 + exp((xmid - time) / scal
+                  death.norm ~ Asym / ((1 + exp((xmid - time) / scal
                                            ))),
                   data = death.country,
                   start = list(
@@ -695,11 +712,8 @@ fitLogistic <- function(death.country = NULL,
                                         max.date.pred = max.date.pred,
                                         min.time = min.time,
                                         nb.obs = 20)
-
-        death.country$prediction <-
-            floor(Alogis / (1 + exp((
-                                     xmid - death.country$time
-                                     ) / scal)))
+        death.country$prediction.norm <-
+            Alogis / (1 + exp((xmid - death.country$time) / scal))
 
         ### confidence intervals for the parameters
         confint.value <- as.matrix(confint2(fit.res.logis))
@@ -718,6 +732,14 @@ fitLogistic <- function(death.country = NULL,
                                    death.country = death.country)
 
 
+        ### inverse value to population size
+        death.country$prediction <- norm.pop.size.inv(value = death.country$prediction.norm,
+                                                      population.size = population.size)
+        l.u.int$lower <- norm.pop.size.inv(value = l.u.int$lower,
+                                           population.size = population.size)
+        l.u.int$upper <- norm.pop.size.inv(value = l.u.int$upper,
+                                           population.size = population.size)
+
         ### modify the values to have better rendering in ggplot graphics
         death.country <- adjust.confint.4plot(l.u.int = l.u.int,
                                               death.country = death.country,
@@ -728,8 +750,46 @@ fitLogistic <- function(death.country = NULL,
 }
 
 
-### fit model
+### normalisation number of death by population size
+norm.pop.size <- function(death.country = NULL,
+                          population.size = NULL)
+{
+        ### normalize with the popupalion size
+        population.scale <-
+            10 ^ 6 / population.size
+        if (is.na(population.scale))
+        {
+            stop("ERROR: population is not available")
+        } else
+        {
+            death.country$death.norm <-
+                death.country$death * population.scale
+        }
 
+        return(death.country)
+}
+
+
+### normalisation number of death by population size
+norm.pop.size.inv <- function(value = NULL,
+                              population.size = NULL)
+{
+        ### normalize with the popupalion size
+        population.scale <-
+            10 ^ 6 / population.size
+        if (is.na(population.scale))
+        {
+            stop("ERROR: population is not available")
+        } else
+        {
+            value <- value / population.scale
+        }
+
+        return(value)
+}
+
+
+### fit model
 fitModel <- function(daily.cumulative.death = NULL,
                      country.population = NULL,
                      countries.of.interest = NULL,
@@ -776,15 +836,20 @@ fitModel <- function(daily.cumulative.death = NULL,
             "\n")
 
         ### fit the model
-        #res.model <- fitLogistic(death.country = death.country,
-        #                         min.time = min.time)
+        cat("fitModel: fit the prediction model\n")
+
+        # res.model <- fitLogistic(death.country = death.country,
+        #                          population.size = country.population[country, "population"],
+        #                          min.time = min.time)
         res.model <- fitRichards(death.country = death.country,
+                                 population.size = country.population[country, "population"],
                                  min.time = min.time)
         death.country <- res.model$death.country
         pic.value <- res.model$confint.list$pic.value
         confint.all[[country]] <- res.model$confint.list
 
         ### normalize time with a number of deaths equals to deaths.ref
+        cat("fitModel: normalize the time\n")
         deaths.ref <-
             2 *  country.population[country, "population"] / 10 ^ 6
         death.country <- death.country[order(death.country$date), ]
@@ -817,19 +882,19 @@ fitModel <- function(daily.cumulative.death = NULL,
             confinement.date[country, "time"] - time.norm - min.time
 
         ### normalize with the popupalion size
-        population.scale <-
-            10 ^ 6 / country.population[country, "population"]
-        if (is.na(population.scale))
-        {
-            stop(paste("ERROR: population is not available for country = ",
-                       country))
-        } else
-        {
-            death.country$prediction.norm <-
-                death.country$prediction * population.scale
-            death.country$death.norm <-
-                death.country$death * population.scale
-        }
+        # population.scale <-
+        #     10 ^ 6 / country.population[country, "population"]
+        # if (is.na(population.scale))
+        # {
+        #     stop(paste("ERROR: population is not available for country = ",
+        #                country))
+        # } else
+        # {
+        #     death.country$prediction.norm <-
+        #         death.country$prediction * population.scale
+        #     death.country$death.norm <-
+        #         death.country$death * population.scale
+        # }
 
         death.prediction <- rbind(death.prediction, death.country)
 
@@ -924,9 +989,9 @@ my.predictNLS <-
             EXPR <- as.expression(form[[3]])
         }
         for (i in 1:NR) {
-            message("predictNLS: ",
-                    paste0("Propagating predictor value #",
-                           i, "..."))
+            # message("predictNLS: ",
+            #         paste0("Propagating predictor value #",
+            #                i, "..."))
             tempDATA <- newdata[i, , drop = FALSE]
             errorDATA <- newerror[i, , drop = FALSE]
             DAT <- as.numeric(c(COEF, tempDATA))
