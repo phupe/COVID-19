@@ -570,6 +570,85 @@ compute.confint <- function(fit.res.nls = NULL,
 }
 
 
+### richards model (Generalised logistic function)
+fitRichards <- function(death.country = NULL,
+                        min.time = NULL)
+{
+
+        params.grid <-
+            expand.grid(
+                        Asym = c(100, seq(1000, 30000, 1000)),
+                        xmid = seq(10, 100, 4),
+                        scal = seq(2, 8, 1),
+                        nu = seq(0.1, 5.1, 1)
+                        )
+        cat("fit with brute force\n")
+        fit.res <-
+            nls2(
+                 death ~ Asym/(1 + nu * exp((xmid - time)/scal))^(1/nu),
+                 data = death.country,
+                 algorithm = "brute-force",
+                 start = params.grid
+                 )
+        Asym0 <- coefficients(fit.res)["Asym"]
+        xmid0 <- coefficients(fit.res)["xmid"]
+        scal0 <- coefficients(fit.res)["scal"]
+        nu0 <- coefficients(fit.res)["nu"]
+        cat("fit with previous model as start value\n")
+        fit.res <-
+            nlsLM(
+                  death ~ Asym/(1 + nu * exp((xmid - time)/scal))^(1/nu),
+                  data = death.country,
+                  start = list(
+                               Asym = Asym0,
+                               xmid = xmid0,
+                               scal = scal0,
+                               nu = nu0
+                               ),
+                  control = nls.lm.control(maxiter = 1024, maxfev = 20000),
+                  model = TRUE
+                  )
+        Asym <- coef(fit.res)["Asym.Asym"]
+        xmid <- coef(fit.res)["xmid.xmid"]
+        scal <- coef(fit.res)["scal.scal"]
+        nu <- coef(fit.res)["nu.nu"]
+        cat("\tAsym: ", Asym, " xmid: ", xmid, " scal: ", scal, "nu: ", nu, "\n")
+
+
+        death.country <- add.extra.date(death.country = death.country,
+                                        max.date.pred = max.date.pred,
+                                        min.time = min.time,
+                                        nb.obs = 20)
+
+        death.country$prediction <-
+            floor(Asym/(1 + nu * exp((xmid - death.country$time)/scal))^(1/nu))
+
+        ### confidence intervals for the parameters
+        confint.value <- as.matrix(confint2(fit.res))
+        confint.pic.value <-
+            min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid", ]) + 1
+        pic.value <-
+            min(daily.cumulative.death$date) + floor(xmid) + 1
+
+        confint.list <-
+            list(confint = confint.value,
+                 confint.pic = confint.pic.value,
+                 pic.value = pic.value)
+
+        ### confidence intervals for the predicted values
+        l.u.int <- compute.confint(fit.res.nls = fit.res,
+                                   death.country = death.country)
+
+
+        ### modify the values to have better rendering in ggplot graphics
+        death.country <- adjust.confint.4plot(l.u.int = l.u.int,
+                                              death.country = death.country,
+                                              y.lim.max = y.lim.max)
+
+        return(list(death.country = death.country,
+                    confint.list = confint.list))
+}
+
 ### logistic model (sigmoid function)
 fitLogistic <- function(death.country = NULL,
                         min.time = NULL)
@@ -697,7 +776,9 @@ fitModel <- function(daily.cumulative.death = NULL,
             "\n")
 
         ### fit the model
-        res.model <- fitLogistic(death.country = death.country,
+        #res.model <- fitLogistic(death.country = death.country,
+        #                         min.time = min.time)
+        res.model <- fitRichards(death.country = death.country,
                                  min.time = min.time)
         death.country <- res.model$death.country
         pic.value <- res.model$confint.list$pic.value
