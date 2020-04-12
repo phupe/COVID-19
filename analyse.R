@@ -8,10 +8,14 @@ require(propagate)
 require(minpack.lm)
 require(RColorBrewer)
 require(htmlwidgets)
+require(gtools)
 
 rm(list = ls())
 
 source("utils.R")
+
+### make script reproducible
+set.seed(12345)
 
 #########################################
 ### Addtional information
@@ -184,7 +188,7 @@ rownames(confinement.date) <- confinement.date$country
 ### World
 ############
 
-nb.countries <- 13
+nb.countries <- 11
 
 ### Top countries
 top.countries <- total.death$country[1:nb.countries]
