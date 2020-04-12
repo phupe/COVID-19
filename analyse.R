@@ -8,10 +8,14 @@ require(propagate)
 require(minpack.lm)
 require(RColorBrewer)
 require(htmlwidgets)
+require(gtools)
 
 rm(list = ls())
 
 source("utils.R")
+
+### make script reproducible
+set.seed(12345)
 
 #########################################
 ### Addtional information
@@ -184,8 +188,10 @@ rownames(confinement.date) <- confinement.date$country
 ### World
 ############
 
+nb.countries <- 11
+
 ### Top countries
-top.countries <- total.death$country[1:13]
+top.countries <- total.death$country[1:nb.countries]
 
 ### countries of interest
 countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan"))
@@ -195,7 +201,7 @@ countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan"))
 ###########
 
 ### Top USA states
-usa.top.countries <- usa.total.death$country[1:13]
+usa.top.countries <- usa.total.death$country[1:nb.countries]
 
 ### USA states of interest
 usa.countries.of.interest <- usa.top.countries
@@ -208,7 +214,7 @@ max.date.pred <- as.Date("05/01/20", format = "%m/%d/%y")
 ### prediction model (world)
 ###################################
 res.prediction <-
-  fitLogistic(
+  fitModel(
     daily.cumulative.death = daily.cumulative.death,
     country.population = country.population,
     countries.of.interest = countries.of.interest,
@@ -230,7 +236,7 @@ confinement.date.top <-
 ###################################
 usa.confinement.date <- NULL
 usa.res.prediction <-
-  fitLogistic(
+  fitModel(
     daily.cumulative.death = usa.daily.cumulative.death,
     country.population = usa.population,
     countries.of.interest = usa.countries.of.interest,
