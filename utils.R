@@ -229,31 +229,49 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
                                   nb.logistic.layer = NULL)
 {
     nb.obj <- length(gg.plotly.fig$x$data)
+
+    for (i in 1:nb.obj)
+    {
+        gg.plotly.fig$x$data[[i]]$visible <- FALSE
+    }
+
+    for (i in 1:nb.countries)
+    {
+        gg.plotly.fig$x$data[[i]]$visible <- TRUE
+    }
+
     nb.countries <- length(countries.of.interest)
-    show.prediction1 <- rep(FALSE, nb.obj)
-    show.prediction1[1:nb.logistic.layer] <- TRUE
+    show.predictionL <- rep(FALSE, nb.obj)
+    show.predictionL[1:nb.logistic.layer] <- TRUE
     hide.prediction <- rep(FALSE, nb.obj)
     hide.prediction[1:nb.countries] <- TRUE
-    show.prediction2 <- hide.prediction
-    show.prediction2[(nb.logistic.layer + 1):nb.obj] <- TRUE
+    show.predictionR <- hide.prediction
+    show.predictionR[(nb.logistic.layer + 1):nb.obj] <- TRUE
+    show.all <- rep(TRUE, nb.obj)
 
     gg.plotly.fig <- gg.plotly.fig %>%
         layout(updatemenus = list(list(
                                        x = 0.1,
                                        y = 0.95 ,
-                                       active = 1,
+                                       active = 3,
                                        showactive = TRUE,
                                        buttons = list(
                                                       list(
                                                            method = "restyle",
-                                                           args = list("visible", as.list(show.prediction1)),
-                                                           label = "Predict (1)"
+                                                           args = list("visible", as.list(show.predictionL)),
+                                                           label = "Predict (L)"
                                                            ),
 
                                                       list(
                                                            method = "restyle",
-                                                           args = list("visible", as.list(show.prediction2)),
-                                                           label = "Predict (2)"
+                                                           args = list("visible", as.list(show.predictionR)),
+                                                           label = "Predict (R)"
+                                                           ),
+
+                                                      list(
+                                                           method = "restyle",
+                                                           args = list("visible", as.list(show.all)),
+                                                           label = "Predict (L+R)"
                                                            ),
 
                                                       list(
