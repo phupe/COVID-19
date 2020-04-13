@@ -110,7 +110,8 @@ confinement.date <-
 ### https://github.com/CSSEGISandData/COVID-19
 ###############################################
 
-data.dir <- "data/COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
+data.dir <-
+  "data/COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 covid.file <-
   paste(data.dir, "time_series_covid19_deaths_global.csv", sep = "")
 
@@ -125,13 +126,15 @@ daily.death <- world.data[["daily.death"]]
 
 
 ### data for all states over USA
-usa.data <- make.covid.agg(covid.file = covid.us.file, group = "Province_State")
+usa.data <-
+  make.covid.agg(covid.file = covid.us.file, group = "Province_State")
 usa.daily.cumulative.death <- usa.data[["daily.cumulative.death"]]
 usa.total.death <- usa.data[["total.death"]]
 usa.daily.death <- usa.data[["daily.death"]]
 
 ### Adjust data for France as ehpad cases were not counted until 04/02/20"
-france.adjusted <- adjust.france(daily.cumulative.death[which(daily.cumulative.death$country == "France"),])
+france.adjusted <-
+  adjust.france(daily.cumulative.death[which(daily.cumulative.death$country == "France"), ])
 # daily.cumulative.death <- rbind(daily.cumulative.death, france.adjusted)
 
 
@@ -151,7 +154,7 @@ country.no.pop.size <-
 if (length(country.no.pop.size) > 0)
 {
   daily.cumulative.death <-
-    daily.cumulative.death[-which(daily.cumulative.death$country %in% country.no.pop.size), ]
+    daily.cumulative.death[-which(daily.cumulative.death$country %in% country.no.pop.size),]
 }
 
 ######################################
@@ -161,10 +164,11 @@ if (length(country.no.pop.size) > 0)
 usa.population.file <-
   "data/nst-est2019-01.tsv"
 usa.population <-
-  make.usa.population(file = usa.population.file) 
+  make.usa.population(file = usa.population.file)
 rownames(usa.population) <- usa.population$country
 
-usa.daily.cumulative.death <- usa.daily.cumulative.death[which(usa.daily.cumulative.death$country %in% usa.population$country),]
+usa.daily.cumulative.death <-
+  usa.daily.cumulative.death[which(usa.daily.cumulative.death$country %in% usa.population$country), ]
 
 
 ### number of deaths all over the world
@@ -194,7 +198,8 @@ nb.countries <- 11
 top.countries <- total.death$country[1:nb.countries]
 
 ### countries of interest
-countries.of.interest <- unique(c(top.countries, "Korea, South", "Japan"))
+countries.of.interest <-
+  unique(c(top.countries, "Korea, South", "Japan"))
 
 ###########
 ### USA
@@ -229,7 +234,7 @@ pic.value.all <- res.prediction[["pic.value.all"]]
 confinement.date <- res.prediction[["confinement.date"]]
 
 confinement.date.top <-
-  confinement.date[which(confinement.date$country %in% countries.of.interest), ]
+  confinement.date[which(confinement.date$country %in% countries.of.interest),]
 
 ###################################
 ### prediction model (USA)
@@ -255,4 +260,3 @@ usa.confinement.date <- usa.res.prediction[["confinement.date"]]
 ###################################
 
 source("plot.R")
-

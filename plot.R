@@ -1,5 +1,6 @@
 
 
+
 myPalette <- colorRampPalette(brewer.pal(12, "Paired"))
 
 
@@ -81,7 +82,7 @@ p.prediction.log.norm <-
 ind.top <- which(daily.death$country %in% countries.of.interest)
 p.daily.death <-
   plot.daily.death(
-    daily.death = daily.death[ind.top,],
+    daily.death = daily.death[ind.top, ],
     countries.of.interest = countries.of.interest,
     title.daily.death = title.daily.death
   )
@@ -91,10 +92,12 @@ htmlwidgets::saveWidget(p.prediction,
                         selfcontained = FALSE,
                         libdir = "lib")
 
-htmlwidgets::saveWidget(p.prediction.log,
-                        "absolute.log.html",
-                        selfcontained = FALSE,
-                        libdir = "lib")
+htmlwidgets::saveWidget(
+  p.prediction.log,
+  "absolute.log.html",
+  selfcontained = FALSE,
+  libdir = "lib"
+)
 
 htmlwidgets::saveWidget(
   p.prediction.norm,
@@ -195,7 +198,7 @@ usa.ind.top <-
 
 usa.p.daily.death <-
   plot.daily.death(
-    daily.death = usa.daily.death[usa.ind.top,],
+    daily.death = usa.daily.death[usa.ind.top, ],
     countries.of.interest = usa.countries.of.interest,
     title.daily.death = usa.title.daily.death
   )
