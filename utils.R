@@ -250,7 +250,8 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
     show.all <- rep(TRUE, nb.obj)
 
     gg.plotly.fig <- gg.plotly.fig %>%
-        layout(updatemenus = list(list(
+        layout(yaxis = list(hoverformat = ".1f"),
+               updatemenus = list(list(
                                        x = 0.1,
                                        y = 0.95 ,
                                        active = 3,
@@ -400,6 +401,7 @@ plot.prediction <- function(death.prediction = NULL,
 #########################################################################################
 plot.prediction.norm <- function(death.prediction = NULL,
                                  countries.of.interest = NULL,
+                                 pic.value.all = NULL,
                                  confinement.date = NULL,
                                  title.prediction.norm = NULL,
                                  log = FALSE)
@@ -413,6 +415,14 @@ plot.prediction.norm <- function(death.prediction = NULL,
         geom_line(data = death.prediction,
                   aes(x = time.norm, y = prediction.norm),
                   linetype = "dashed") +
+        geom_point(
+                   data = pic.value.all,
+                   aes(x = time.norm, y = peak.epidemic.norm),
+                   shape = 24,
+                   size = 4,
+                   color = "darkred",
+                   show.legend = FALSE
+                   ) +
 labs(x = "normalized time (day)",
      y = "#deaths (per millions inhabitants)") +
 ggtitle(title.prediction.norm)
@@ -446,8 +456,15 @@ p.prediction.norm <-
 nb.logistic.layer <- length(ggplotly(p.prediction.norm)$x$data)
 p.prediction.norm <- p.prediction.norm +       geom_line(data = death.prediction,
                                                          aes(x = time.norm, y = prediction.norm.richards),
-                                                         linetype = "dashed")
-
+                                                         linetype = "dashed") +
+        geom_point(
+                   data = pic.value.all,
+                   aes(x = time.norm.richards, y = peak.epidemic.richards.norm),
+                   shape = 24,
+                   size = 4,
+                   color = "darkred",
+                   show.legend = FALSE
+                   )
 
 p.prediction.norm <- ggplotly(p.prediction.norm)
 p.prediction.norm <- format.legend.ggplotly(p.prediction.norm)
@@ -864,7 +881,7 @@ norm.pop.size.inv <- function(value = NULL,
         stop("ERROR: population is not available")
     } else
     {
-        value <- value / population.scale
+        value <- floor(value / population.scale)
     }
 
     return(value)
@@ -979,18 +996,26 @@ fitModel <- function(daily.cumulative.death = NULL,
         {
             ind.pic <- which(death.country$date == pic.value)
             peak.epidemic <- death.country$prediction[ind.pic]
+            peak.epidemic.norm <- peak.epidemic /  country.population[country, "population"] * 10^6
+            time.norm <- death.country$time.norm[ind.pic]
         } else
         {
             peak.epidemic <- death.country$prediction[max.date.pred]
+            peak.epidemic.norm <- death.country$prediction.norm[max.date.pred]
+            time.norm <- death.country$time.norm[max.date.pred]
         }
 
         if (pic.value.richards <= max.date.pred)
         {
             ind.pic <- which(death.country$date == pic.value.richards)
             peak.epidemic.richards <- death.country$prediction.richards[ind.pic]
+            peak.epidemic.richards.norm <- peak.epidemic.richards /  country.population[country, "population"] * 10^6
+            time.norm.richards <- death.country$time.norm[ind.pic]
         } else
         {
             peak.epidemic.richards <- death.country$prediction.richards[max.date.pred]
+            peak.epidemic.richards.norm <- death.country$prediction.norm[max.date.pred]
+            time.norm.richards <- death.country$time.norm[max.date.pred]
         }
         if (nrow(death.country) > 20)
         {
@@ -998,14 +1023,20 @@ fitModel <- function(daily.cumulative.death = NULL,
                 data.frame(
                            country = country,
                            date = pic.value,
+                           time.norm = time.norm,
                            date.richards = pic.value.richards,
+                           time.norm.richards = time.norm.richards,
                            peak.epidemic = peak.epidemic,
                            peak.epidemic.richards = peak.epidemic.richards,
+                           peak.epidemic.norm = peak.epidemic.norm,
+                           peak.epidemic.richards.norm = peak.epidemic.richards.norm,
                            stringsAsFactors = FALSE
                            )
             pic.value.all <- rbind(pic.value.all, pic.value.df)
         }
     }
+
+    death.prediction$prediction.norm <- round(death.prediction$prediction.norm, 1)
 
     return(
            list(

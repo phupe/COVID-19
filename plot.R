@@ -44,6 +44,7 @@ p.prediction.norm <-
   plot.prediction.norm(
     death.prediction = death.prediction,
     countries.of.interest = countries.of.interest,
+    pic.value.all = pic.value.all,
     confinement.date = confinement.date.top,
     title.prediction.norm = title.prediction.norm,
     log = FALSE
@@ -69,6 +70,7 @@ p.prediction.log.norm <-
   plot.prediction.norm(
     death.prediction = death.prediction,
     countries.of.interest = countries.of.interest,
+    pic.value.all = pic.value.all,
     confinement.date = confinement.date.top,
     title.prediction.norm = title.prediction.norm,
     log = TRUE
@@ -155,6 +157,7 @@ usa.p.prediction.norm <-
   plot.prediction.norm(
     death.prediction = usa.death.prediction,
     countries.of.interest = usa.countries.of.interest,
+    pic.value.all = usa.pic.value.all,
     confinement.date = NULL,
     title.prediction.norm = usa.title.prediction.norm,
     log = FALSE
@@ -179,6 +182,7 @@ usa.p.prediction.log.norm <-
   plot.prediction.norm(
     death.prediction = usa.death.prediction,
     countries.of.interest = usa.countries.of.interest,
+    pic.value.all = usa.pic.value.all,
     confinement.date = NULL,
     title.prediction.norm = usa.title.prediction.norm,
     log = TRUE
