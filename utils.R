@@ -229,6 +229,7 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
                                   nb.logistic.layer = NULL)
 {
     nb.obj <- length(gg.plotly.fig$x$data)
+    nb.countries <- length(countries.of.interest)
 
     for (i in 1:nb.obj)
     {
@@ -240,7 +241,6 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
         gg.plotly.fig$x$data[[i]]$visible <- TRUE
     }
 
-    nb.countries <- length(countries.of.interest)
     show.predictionL <- rep(FALSE, nb.obj)
     show.predictionL[1:nb.logistic.layer] <- TRUE
     hide.prediction <- rep(FALSE, nb.obj)
