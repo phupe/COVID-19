@@ -52,31 +52,31 @@ p.prediction.norm <-
   )
 
 
-#########################################################################################
-p.prediction.log <-
-  plot.prediction(
-    death.prediction = death.prediction,
-    countries.of.interest = countries.of.interest,
-    max.date.pred = max.date.pred,
-    y.lim.max = y.lim.max,
-    pic.value.all = pic.value.all,
-    confinement.date = confinement.date.top,
-    log = TRUE,
-    title.prediction = title.prediction
-  )
-
-
-#########################################################################################
-p.prediction.log.norm <-
-  plot.prediction.norm(
-    death.prediction = death.prediction,
-    countries.of.interest = countries.of.interest,
-    pic.value.all = pic.value.all,
-    confinement.date = confinement.date.top,
-    title.prediction.norm = title.prediction.norm,
-    log = TRUE
-  )
-
+# #########################################################################################
+# p.prediction.log <-
+#   plot.prediction(
+#     death.prediction = death.prediction,
+#     countries.of.interest = countries.of.interest,
+#     max.date.pred = max.date.pred,
+#     y.lim.max = y.lim.max,
+#     pic.value.all = pic.value.all,
+#     confinement.date = confinement.date.top,
+#     log = TRUE,
+#     title.prediction = title.prediction
+#   )
+# 
+# 
+# #########################################################################################
+# p.prediction.log.norm <-
+#   plot.prediction.norm(
+#     death.prediction = death.prediction,
+#     countries.of.interest = countries.of.interest,
+#     pic.value.all = pic.value.all,
+#     confinement.date = confinement.date.top,
+#     title.prediction.norm = title.prediction.norm,
+#     log = TRUE
+#   )
+# 
 
 ### number of death per day
 ind.top <- which(daily.death$country %in% countries.of.interest)
@@ -88,30 +88,30 @@ p.daily.death <-
   )
 
 htmlwidgets::saveWidget(p.prediction,
-                        "absolute.linear.html",
+                        "absolute.html",
                         selfcontained = FALSE,
                         libdir = "lib")
 
-htmlwidgets::saveWidget(
-  p.prediction.log,
-  "absolute.log.html",
-  selfcontained = FALSE,
-  libdir = "lib"
-)
+# htmlwidgets::saveWidget(
+#   p.prediction.log,
+#   "absolute.log.html",
+#   selfcontained = FALSE,
+#   libdir = "lib"
+# )
 
 htmlwidgets::saveWidget(
   p.prediction.norm,
-  "absolute.linear.norm.html",
+  "absolute.norm.html",
   selfcontained = FALSE,
   libdir = "lib"
 )
 
-htmlwidgets::saveWidget(
-  p.prediction.log.norm,
-  "absolute.log.norm.html",
-  selfcontained = FALSE,
-  libdir = "lib"
-)
+# htmlwidgets::saveWidget(
+#   p.prediction.log.norm,
+#   "absolute.log.norm.html",
+#   selfcontained = FALSE,
+#   libdir = "lib"
+# )
 
 htmlwidgets::saveWidget(p.daily.death,
                         "daily.html",
@@ -166,30 +166,30 @@ usa.p.prediction.norm <-
     log = FALSE
   )
 
-#########################################################################################
-usa.p.prediction.log <-
-  plot.prediction(
-    death.prediction = usa.death.prediction,
-    countries.of.interest = usa.countries.of.interest,
-    max.date.pred = max.date.pred,
-    y.lim.max = usa.y.lim.max,
-    pic.value.all = usa.pic.value.all,
-    confinement.date = NULL,
-    log = TRUE,
-    title.prediction = usa.title.prediction
-  )
-
-
-#########################################################################################
-usa.p.prediction.log.norm <-
-  plot.prediction.norm(
-    death.prediction = usa.death.prediction,
-    countries.of.interest = usa.countries.of.interest,
-    pic.value.all = usa.pic.value.all,
-    confinement.date = NULL,
-    title.prediction.norm = usa.title.prediction.norm,
-    log = TRUE
-  )
+# #########################################################################################
+# usa.p.prediction.log <-
+#   plot.prediction(
+#     death.prediction = usa.death.prediction,
+#     countries.of.interest = usa.countries.of.interest,
+#     max.date.pred = max.date.pred,
+#     y.lim.max = usa.y.lim.max,
+#     pic.value.all = usa.pic.value.all,
+#     confinement.date = NULL,
+#     log = TRUE,
+#     title.prediction = usa.title.prediction
+#   )
+# 
+# 
+# #########################################################################################
+# usa.p.prediction.log.norm <-
+#   plot.prediction.norm(
+#     death.prediction = usa.death.prediction,
+#     countries.of.interest = usa.countries.of.interest,
+#     pic.value.all = usa.pic.value.all,
+#     confinement.date = NULL,
+#     title.prediction.norm = usa.title.prediction.norm,
+#     log = TRUE
+#   )
 
 ### number of death per day
 usa.ind.top <-
@@ -205,31 +205,31 @@ usa.p.daily.death <-
 
 htmlwidgets::saveWidget(
   usa.p.prediction,
-  "usa.absolute.linear.html",
+  "usa.absolute.html",
   selfcontained = FALSE,
   libdir = "lib"
 )
 
-htmlwidgets::saveWidget(
-  usa.p.prediction.log,
-  "usa.absolute.log.html",
-  selfcontained = FALSE,
-  libdir = "lib"
-)
+# htmlwidgets::saveWidget(
+#   usa.p.prediction.log,
+#   "usa.absolute.log.html",
+#   selfcontained = FALSE,
+#   libdir = "lib"
+# )
 
 htmlwidgets::saveWidget(
   usa.p.prediction.norm,
-  "usa.absolute.linear.norm.html",
+  "usa.absolute.norm.html",
   selfcontained = FALSE,
   libdir = "lib"
 )
 
-htmlwidgets::saveWidget(
-  usa.p.prediction.log.norm,
-  "usa.absolute.log.norm.html",
-  selfcontained = FALSE,
-  libdir = "lib"
-)
+# htmlwidgets::saveWidget(
+#   usa.p.prediction.log.norm,
+#   "usa.absolute.log.norm.html",
+#   selfcontained = FALSE,
+#   libdir = "lib"
+# )
 
 htmlwidgets::saveWidget(usa.p.daily.death,
                         "usa.daily.html",

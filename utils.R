@@ -253,7 +253,7 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
     layout(yaxis = list(hoverformat = ".1f"),
            updatemenus = list(
              list(
-               x = 0.1,
+               x = 0.09,
                y = 0.95 ,
                active = 3,
                showactive = TRUE,
@@ -282,7 +282,23 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
                    label = "Raw data"
                  )
                )
-             )
+             ),
+                          list(
+                               x = 0.19,
+                               y = 0.95,
+                               active = 0,
+                               showactive = TRUE,
+                               buttons = list(
+
+                                              list(method = "relayout",
+                                                   args = list("yaxis.type", "linear"),
+                                                   label = "linear"),
+
+                                              list(method = "relayout",
+                                                   args = list("yaxis.type", "log"),
+                                                   label = "logarithmic"))
+
+                               )
            ))
   
   return(gg.plotly.fig)
