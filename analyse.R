@@ -21,88 +21,23 @@ set.seed(12345)
 ### Addtional information
 #########################################
 
-### confinement dates
-# rep tcheque 13 mars
-# nouvelle zealand 23 mars
-# malaisie 18 mars
-# afrique du sud 27 mars
-# zimbawe 27 mars
-# Tunisia 20 mars
-# Marco 21 mars
-# salvador 21 mars
-# colombie 24 mars
-# venezuela 17 mars
-# bolivia 22 mars
-# argentine 19 mars
-confinement.date <- NULL
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "Austria",
-          date = as.Date("03/15/20", format = "%m/%d/%y")
-        ))
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "Belgium",
-          date = as.Date("03/18/20", format = "%m/%d/%y")
-        ))
-confinement.date <-
-  rbind(confinement.date, data.frame(
-    country = "China",
-    date = as.Date("01/22/20", format = "%m/%d/%y")
-  ))
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "Denmark",
-          date = as.Date("03/13/20", format = "%m/%d/%y")
-        ))
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "France",
-          date = as.Date("03/17/20", format = "%m/%d/%y")
-        ))
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "Greece",
-          date = as.Date("03/23/20", format = "%m/%d/%y")
-        ))
-confinement.date <-
-  rbind(confinement.date, data.frame(
-    country = "India",
-    date = as.Date("03/24/20", format = "%m/%d/%y")
-  ))
-confinement.date <-
-  rbind(confinement.date, data.frame(
-    country = "Italy",
-    date = as.Date("03/08/20", format = "%m/%d/%y")
-  ))
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "Portugal",
-          date = as.Date("03/19/20", format = "%m/%d/%y")
-        ))
-confinement.date <-
-  rbind(confinement.date,
-        data.frame(
-          country = "Romania",
-          date = as.Date("03/25/20", format = "%m/%d/%y")
-        ))
-#confinement.date <- rbind(confinement.date, data.frame(country = "Russia", date = as.Date("03/30/20", format="%m/%d/%y")))
-confinement.date <-
-  rbind(confinement.date, data.frame(
-    country = "Spain",
-    date = as.Date("03/14/20", format = "%m/%d/%y")
-  ))
-confinement.date <-
-  rbind(confinement.date, data.frame(
-    country = "UK",
-    date = as.Date("03/23/20", format = "%m/%d/%y")
-  ))
+# confinement dates
+# Czech Republic 13 march
+# New Zealand 23 march
+# Malaysia 18 march
+# South Africa 27 march
+# zimbawe 27 march
+# Tunisia 20 march
+# Marocco 21 march
+# Salvador 21 march
+# Colombia 24 march
+# Venezuela 17 march
+# Bolivia 22 march
+# Argentina 19 march
+
+confinement.date <- read.table(file = "data/confinement.date.tsv", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+confinement.date$date <- as.Date(confinement.date$date)
 
 
 ##############################################
