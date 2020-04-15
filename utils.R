@@ -332,7 +332,6 @@ plot.prediction <- function(death.prediction = NULL,
                             y.lim.max = NULL,
                             pic.value.all = NULL,
                             confinement.date = NULL,
-                            log = FALSE,
                             title.prediction = NULL)
 {
   p.prediction <- ggplot(death.prediction, aes(date, death)) +
@@ -371,20 +370,9 @@ plot.prediction <- function(death.prediction = NULL,
     )
   }
   
-  if (log == FALSE)
-  {
-    p.prediction <- p.prediction + scale_y_continuous(n.breaks = 15,
-                                                      limits = c(0, y.lim.max))
-    
-  } else
-  {
-    p.prediction <- p.prediction + scale_y_continuous(
-      trans = "log2",
-      n.breaks = 16,
-      limits = c(1, y.lim.max)
-    )
-  }
-  
+  p.prediction <- p.prediction + scale_y_continuous(n.breaks = 15,
+                                                   limits = c(0, y.lim.max))
+
   p.prediction <- p.prediction + labs(y = "#deaths") +
     aes(color = country, fill = country) +
     ggtitle(title.prediction)
@@ -425,8 +413,7 @@ plot.prediction.norm <- function(death.prediction = NULL,
                                  countries.of.interest = NULL,
                                  pic.value.all = NULL,
                                  confinement.date = NULL,
-                                 title.prediction.norm = NULL,
-                                 log = FALSE)
+                                 title.prediction.norm = NULL)
 {
   p.prediction.norm <-
     ggplot(death.prediction, aes(time.norm, death.norm)) +
@@ -458,19 +445,9 @@ plot.prediction.norm <- function(death.prediction = NULL,
     )
   }
   
-  if (log == FALSE)
-  {
-    p.prediction.norm <-
-      p.prediction.norm + scale_y_continuous(n.breaks = 15,
-                                             limits = c(0, 600))
-  } else
-  {
-    p.prediction.norm <- p.prediction.norm + scale_y_continuous(
-      trans = "log2",
-      breaks = 2 ^ (-6:9),
-      limits = c(0.01, 600)
-    )
-  }
+  p.prediction.norm <-
+    p.prediction.norm + scale_y_continuous(n.breaks = 15,
+                                           limits = c(0, 600))
   
   p.prediction.norm <-
     p.prediction.norm + aes(color = country, fill = country)
@@ -510,14 +487,15 @@ plot.daily.death <- function(daily.death = NULL,
                              title.daily.death = NULL)
 {
   p.daily.death <- ggplot(daily.death, aes(date, death)) +
-    geom_line(aes(color = country)) +
-    geom_point(aes(color = country)) +
+    geom_line() +
+    geom_point() +
     scale_color_manual(values = myPalette(length(countries.of.interest))) +
     scale_fill_manual(values = myPalette(length(countries.of.interest))) +
     scale_x_date(date_breaks = "7 days", date_minor_breaks = "1 day") +
     ggtitle(title.daily.death) +
-    ylab("death per day")
-  
+    ylab("death per day") +
+    aes(color = country, fill = country)
+
   p.daily.death <- ggplotly(p.daily.death)
   
   p.daily.death <- p.daily.death %>%
