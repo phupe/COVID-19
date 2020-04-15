@@ -112,10 +112,10 @@ make.covid.agg <-
     
     ### aggregate values by country
     covid.agg <-
-      rowsum(covid[,-ind.del], group = covid[, group])
+      rowsum(covid[, -ind.del], group = covid[, group])
     
     ### date (MM/DD/YYYY)
-    covid.date <- t(covid.header[1,-ind.del])
+    covid.date <- t(covid.header[1, -ind.del])
     
     ######################################################################################
     ### data.frame with country, date, death with number of death per day (cumul per day)
@@ -131,7 +131,7 @@ make.covid.agg <-
         c(country.value, rep(rownames(covid.agg)[i], ncol(covid.agg)))
       date.value <- c(date.value, covid.date)
       death.value <-
-        c(death.value, as.vector(t(covid.agg[i, ])))
+        c(death.value, as.vector(t(covid.agg[i,])))
     }
     
     daily.cumulative.death <- data.frame(
@@ -158,7 +158,7 @@ make.covid.agg <-
         c(country.value, rep(rownames(covid.agg)[i], ncol(covid.agg) - 1))
       date.value <- c(date.value, covid.date[-1])
       death.value <-
-        c(death.value, diff(as.vector(t(covid.agg[i, ]))))
+        c(death.value, diff(as.vector(t(covid.agg[i,]))))
     }
     
     daily.death <- data.frame(
@@ -189,7 +189,7 @@ make.covid.agg <-
     total.death$death.total <-
       total.death$death.t0 + total.death$death
     total.death <-
-      total.death[order(total.death$death.total, decreasing = TRUE), ]
+      total.death[order(total.death$death.total, decreasing = TRUE),]
     
     return(
       list(
@@ -283,24 +283,28 @@ add.prediction.button <- function(gg.plotly.fig = NULL,
                  )
                )
              ),
-                          list(
-                               x = 0.19,
-                               y = 0.95,
-                               active = 0,
-                               showactive = TRUE,
-                               buttons = list(
-
-                                              list(method = "relayout",
-                                                   args = list("yaxis.type", "linear"),
-                                                   label = "linear"),
-
-                                              list(method = "relayout",
-                                                   args = list("yaxis.type", "log"),
-                                                   label = "logarithmic"))
-
-                               )
+             list(
+               x = 0.19,
+               y = 0.95,
+               active = 0,
+               showactive = TRUE,
+               buttons = list(
+                 list(
+                   method = "relayout",
+                   args = list("yaxis.type", "linear"),
+                   label = "linear"
+                 ),
+                 
+                 list(
+                   method = "relayout",
+                   args = list("yaxis.type", "log"),
+                   label = "logarithmic"
+                 )
+               )
+               
+             )
            ))
-  
+
   return(gg.plotly.fig)
 }
 
@@ -458,13 +462,13 @@ plot.prediction.norm <- function(death.prediction = NULL,
   {
     p.prediction.norm <-
       p.prediction.norm + scale_y_continuous(n.breaks = 15,
-                                             limits = c(0, 500))
+                                             limits = c(0, 600))
   } else
   {
     p.prediction.norm <- p.prediction.norm + scale_y_continuous(
       trans = "log2",
       breaks = 2 ^ (-6:9),
-      limits = c(0.01, 500)
+      limits = c(0.01, 600)
     )
   }
   
@@ -514,7 +518,34 @@ plot.daily.death <- function(daily.death = NULL,
     ggtitle(title.daily.death) +
     ylab("death per day")
   
-  return(ggplotly(p.daily.death))
+  p.daily.death <- ggplotly(p.daily.death)
+  
+  p.daily.death <- p.daily.death %>%
+    layout(
+           updatemenus = list(
+             list(
+               x = 0.09,
+               y = 0.95,
+               active = 0,
+               showactive = TRUE,
+               buttons = list(
+                 list(
+                   method = "relayout",
+                   args = list("yaxis.type", "linear"),
+                   label = "linear"
+                 ),
+                 
+                 list(
+                   method = "relayout",
+                   args = list("yaxis.type", "log"),
+                   label = "logarithmic"
+                 )
+               )
+               
+             )
+           ))
+
+  return(p.daily.death)
 }
 
 
@@ -590,7 +621,7 @@ fitBrody <- function(death.country)
   fit.res.brody0 <-
     nls2(
       log(death) ~ Asym * (1 - exp(-scal * (newtime - xmid)) ^ 3),
-      data = death.country[-ind.na, ],
+      data = death.country[-ind.na,],
       algorithm = "brute-force",
       start = params.grid
     )
@@ -661,28 +692,29 @@ add.extra.date <- function(death.country = NULL,
 compute.confint <- function(fit.res.nls = NULL,
                             death.country = NULL,
                             do.sim = FALSE,
-                            nsim = 10^5)
+                            nsim = 10 ^ 5)
 {
   cat("condidence interval\n")
   l.u.int.values <-
-    my.predictNLS(fit.res.nls,
-                  death.country["time"],
-                  interval = "confidence",
-                  do.sim = do.sim,
-                  nsim = nsim)
-  if(do.sim)
+    my.predictNLS(
+      fit.res.nls,
+      death.country["time"],
+      interval = "confidence",
+      do.sim = do.sim,
+      nsim = nsim
+    )
+  if (do.sim)
   {
-  l.u.int <-
-    data.frame(lower = l.u.int.values$summary$Sim.2.5,
-               upper = l.u.int.values$summary$Sim.97.5)
+    l.u.int <-
+      data.frame(lower = l.u.int.values$summary$Sim.2.5,
+                 upper = l.u.int.values$summary$Sim.97.5)
   } else
   {
-
-  l.u.int <-
-    data.frame(lower = l.u.int.values$summary$Prop.2.5,
-               upper = l.u.int.values$summary$Prop.97.5)
+    l.u.int <-
+      data.frame(lower = l.u.int.values$summary$Prop.2.5,
+                 upper = l.u.int.values$summary$Prop.97.5)
   }
-
+  
   return(l.u.int)
 }
 
@@ -777,7 +809,7 @@ fitRichards <- function(death.country = NULL,
   ### confidence intervals for the parameters
   confint.value <- as.matrix(confint2(fit.res))
   confint.pic.value <-
-    min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid",]) + 1
+    min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid", ]) + 1
   pic.value <-
     min(daily.cumulative.death$date) + floor(xmid) + 1
   
@@ -870,7 +902,7 @@ fitLogistic <- function(death.country = NULL,
   ### confidence intervals for the parameters
   confint.value <- as.matrix(confint2(fit.res.logis))
   confint.pic.value <-
-    min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid",]) + 1
+    min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid", ]) + 1
   pic.value <-
     min(daily.cumulative.death$date) + floor(xmid) + 1
   
@@ -971,11 +1003,11 @@ fitModel <- function(daily.cumulative.death = NULL,
   {
     cat("\n")
     ind <- which(daily.cumulative.death$country == country)
-    death.country <- daily.cumulative.death[ind,]
+    death.country <- daily.cumulative.death[ind, ]
     ind.0 <- which(death.country$death <= 5)
     if (length(ind.0) > 0)
     {
-      death.country <- death.country[-ind.0,]
+      death.country <- death.country[-ind.0, ]
     }
     death.country$time <- as.numeric(death.country$date)
     death.country$time <- death.country$time - min.time
@@ -1025,7 +1057,7 @@ fitModel <- function(daily.cumulative.death = NULL,
     cat("fitModel: normalize the time\n")
     deaths.ref <-
       2 *  country.population[country, "population"] / 10 ^ 6
-    death.country <- death.country[order(death.country$date),]
+    death.country <- death.country[order(death.country$date), ]
     
     if (deaths.ref < min(death.country$death, na.rm = TRUE))
     {
@@ -1221,7 +1253,7 @@ my.predictNLS <-
       outPROP <- PROP$prop
       outSIM <- PROP$sim
       OUT <- c(outPROP, outSIM)
-      outMAT[i,] <- OUT
+      outMAT[i, ] <- OUT
     }
     outMAT <- as.data.frame(outMAT)
     colnames(outMAT) <-

@@ -18,7 +18,7 @@ source("utils.R")
 set.seed(12345)
 
 #########################################
-### Addtional information
+### Additional information
 #########################################
 
 # confinement dates
