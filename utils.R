@@ -659,18 +659,30 @@ add.extra.date <- function(death.country = NULL,
 
 ### compute confint for NLS model
 compute.confint <- function(fit.res.nls = NULL,
-                            death.country = NULL)
+                            death.country = NULL,
+                            do.sim = FALSE,
+                            nsim = 10^5)
 {
   cat("condidence interval\n")
   l.u.int.values <-
     my.predictNLS(fit.res.nls,
                   death.country["time"],
                   interval = "confidence",
-                  do.sim = FALSE)
+                  do.sim = do.sim,
+                  nsim = nsim)
+  if(do.sim)
+  {
+  l.u.int <-
+    data.frame(lower = l.u.int.values$summary$Sim.2.5,
+               upper = l.u.int.values$summary$Sim.97.5)
+  } else
+  {
+
   l.u.int <-
     data.frame(lower = l.u.int.values$summary$Prop.2.5,
                upper = l.u.int.values$summary$Prop.97.5)
-  
+  }
+
   return(l.u.int)
 }
 
