@@ -57,6 +57,9 @@ make.world.population <- function(file = NULL, country)
   world.population$country[which(world.population$country == "Viet Nam")] <-
     "Vietnam"
   
+
+  rownames(world.population) <- world.population$country
+  
   return(world.population)
 }
 
@@ -74,6 +77,8 @@ make.usa.population <- function(file = NULL, country)
     population = usa.population$X2019,
     stringsAsFactors = FALSE
   )
+  
+  rownames(usa.population) <- usa.population$country
   
   return(usa.population)
 }
@@ -719,8 +724,8 @@ fitRichards <- function(death.country = NULL,
   params.grid <-
     expand.grid(
       #Asym = my.logit(c(1, seq(10, 1100, 100))),
-      Asym = c(1, seq(10, 1100, 100)),
-      xmid = seq(10, 100, 2),
+      Asym = c(1, seq(10, 800, 100)),
+      xmid = seq(20, 100, 2),
       scal = seq(2, 10, 1),
       nu = log(seq(0.1, 5.1, 1))
     )

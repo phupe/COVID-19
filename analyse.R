@@ -80,7 +80,6 @@ world.population.file <-
   "data/WPP2019_POP_F01_1_TOTAL_POPULATION_BOTH_SEXES.tsv"
 country.population <-
   make.world.population(file = world.population.file)
-rownames(country.population) <- country.population$country
 
 country.no.pop.size <-
   setdiff(unique(daily.cumulative.death$country),
@@ -100,7 +99,6 @@ usa.population.file <-
   "data/nst-est2019-01.tsv"
 usa.population <-
   make.usa.population(file = usa.population.file)
-rownames(usa.population) <- usa.population$country
 
 usa.daily.cumulative.death <-
   usa.daily.cumulative.death[which(usa.daily.cumulative.death$country %in% usa.population$country), ]
@@ -135,6 +133,10 @@ top.countries <- total.death$country[1:nb.countries]
 ### countries of interest
 countries.of.interest <-
   unique(c(top.countries, "Korea, South", "Japan"))
+
+countries.of.interest <-
+  unique(top.countries)
+
 
 ###########
 ### USA
