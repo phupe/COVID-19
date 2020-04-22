@@ -125,7 +125,7 @@ rownames(confinement.date) <- confinement.date$country
 ### World
 ############
 
-nb.countries <- 20
+nb.countries <- 30
 
 ### Top countries
 top.countries <- total.death$country[1:nb.countries]
@@ -137,7 +137,6 @@ countries.of.interest <-
 countries.of.interest <-
   unique(top.countries)
 
-
 ###########
 ### USA
 ###########
@@ -148,9 +147,9 @@ usa.top.countries <- usa.total.death$country[1:nb.countries]
 ### USA states of interest
 usa.countries.of.interest <- usa.top.countries
 
-y.lim.max <- 32500
-usa.y.lim.max <- 11000
-max.date.pred <- as.Date("05/15/20", format = "%m/%d/%y")
+y.lim.max <- 50000
+usa.y.lim.max <- 22000
+max.date.pred <- as.Date("05/31/20", format = "%m/%d/%y")
 
 ###################################
 ### prediction model (world)

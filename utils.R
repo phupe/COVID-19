@@ -352,10 +352,10 @@ plot.prediction <- function(death.prediction = NULL,
       date_minor_breaks = "1 day",
       limits = c(min(death.prediction$date), max.date.pred)
     ) +
-    geom_ribbon(data = death.prediction,
-                aes(ymin = lower,
-                    ymax = upper),
-                alpha = 0.3) +
+    #geom_ribbon(data = death.prediction,
+    #            aes(ymin = lower,
+    #                ymax = upper),
+    #            alpha = 0.3) +
     geom_point(
       data = pic.value.all,
       aes(x = date, y = peak.epidemic),
@@ -388,12 +388,11 @@ plot.prediction <- function(death.prediction = NULL,
     geom_line(data = death.prediction,
               aes(x = date, y = prediction.richards),
               linetype = "dashed") +
-    geom_ribbon(
-      data = death.prediction,
-      aes(ymin = lower.richards,
-          ymax = upper.richards),
-      alpha = 0.3
-    ) +
+    #geom_ribbon(
+    #  data = death.prediction,
+    #  aes(ymin = lower.richards,
+    #      ymax = upper.richards),
+    #  alpha = 0.3) +
     geom_point(
       data = pic.value.all,
       aes(x = date.richards, y = peak.epidemic.richards),
@@ -452,7 +451,7 @@ plot.prediction.norm <- function(death.prediction = NULL,
   
   p.prediction.norm <-
     p.prediction.norm + scale_y_continuous(n.breaks = 15,
-                                           limits = c(0, 600))
+                                           limits = c(0, 700))
   
   p.prediction.norm <-
     p.prediction.norm + aes(color = country, fill = country)
@@ -721,6 +720,9 @@ fitRichards <- function(death.country = NULL,
 {
   death.country <- norm.pop.size(death.country = death.country,
                                  population.size = population.size)
+  
+  nb.obs <- nrow(death.country)
+
   params.grid <-
     expand.grid(
       #Asym = my.logit(c(1, seq(10, 1100, 100))),
@@ -814,11 +816,13 @@ fitRichards <- function(death.country = NULL,
   l.u.int$upper <- norm.pop.size.inv(value = l.u.int$upper,
                                      population.size = population.size)
   
+  l.u.int$upper[1:nb.obs] <- l.u.int$lower[1:nb.obs] <- NA
+
   ### modify the values to have better rendering in ggplot graphics
   death.country <- adjust.confint.4plot(l.u.int = l.u.int,
                                         death.country = death.country,
                                         y.lim.max = y.lim.max)
-  
+
   return(list(death.country = death.country,
               confint.list = confint.list))
 }
