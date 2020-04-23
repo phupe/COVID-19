@@ -104,6 +104,9 @@ usa.daily.cumulative.death <-
   usa.daily.cumulative.death[which(usa.daily.cumulative.death$country %in% usa.population$country), ]
 
 
+usa.total.death <-
+  usa.total.death[which(usa.total.death$country %in% usa.population$country), ]
+
 ### number of deaths all over the world
 dd.world <-
   aggregate(daily.cumulative.death["death"],
@@ -134,8 +137,6 @@ top.countries <- total.death$country[1:nb.countries]
 countries.of.interest <-
   unique(c(top.countries, "Korea, South", "Japan"))
 
-countries.of.interest <-
-  unique(top.countries)
 
 ###########
 ### USA

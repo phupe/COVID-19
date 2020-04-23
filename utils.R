@@ -756,72 +756,96 @@ fitRichards <- function(death.country = NULL,
       nu0,
       "\n")
   cat("fit with previous model as start value\n")
-  fit.res <-
-    nlsLM(
-      #death.norm ~ my.inv.logit(Asym)/(1 + exp(nu) * exp((xmid - time)/scal))^(1 / exp(nu)),
-      death.norm ~ Asym / (1 + exp(nu) * exp((xmid - time) / scal)) ^
-        (1 / exp(nu)),
-      data = death.country,
-      start = list(
-        Asym = Asym0,
-        xmid = xmid0,
-        scal = scal0,
-        nu = nu0
-      ),
-      control = nls.lm.control(maxiter = 1024, maxfev = 20000),
-      model = TRUE
-    )
-  Asym <- coef(fit.res)["Asym.Asym"]
-  xmid <- coef(fit.res)["xmid.xmid"]
-  scal <- coef(fit.res)["scal.scal"]
-  nu <- coef(fit.res)["nu.nu"]
-  #cat("\tAsym: ", my.inv.logit(Asym), " xmid: ", xmid, " scal: ", scal, "nu: ", nu, "\n")
-  cat("\tAsym: ", Asym, " xmid: ", xmid, " scal: ", scal, "nu: ", nu, "\n")
-  
-  
-  death.country <- add.extra.date(
-    death.country = death.country,
-    max.date.pred = max.date.pred,
-    min.time = min.time,
-    nb.obs = 20
-  )
-  
-  death.country$prediction.norm <-
-    #my.inv.logit(Asym)/(1 + exp(nu) * exp((xmid - death.country$time)/scal))^(1 / exp(nu))
-    Asym / (1 + exp(nu) * exp((xmid - death.country$time) / scal)) ^
-    (1 / exp(nu))
-  
-  ### confidence intervals for the parameters
-  confint.value <- as.matrix(confint2(fit.res))
-  confint.pic.value <-
-    min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid", ]) + 1
-  pic.value <-
-    min(daily.cumulative.death$date) + floor(xmid) + 1
-  
-  confint.list <-
-    list(confint = confint.value,
-         confint.pic = confint.pic.value,
-         pic.value = pic.value)
-  
-  ### confidence intervals for the predicted values
-  l.u.int <- compute.confint(fit.res.nls = fit.res,
-                             death.country = death.country)
-  
-  ### inverse value to population size
-  death.country$prediction <-
-    norm.pop.size.inv(value = death.country$prediction.norm,
-                      population.size = population.size)
-  l.u.int$lower <- norm.pop.size.inv(value = l.u.int$lower,
-                                     population.size = population.size)
-  l.u.int$upper <- norm.pop.size.inv(value = l.u.int$upper,
-                                     population.size = population.size)
-  
-  l.u.int$upper[1:nb.obs] <- l.u.int$lower[1:nb.obs] <- NA
+  an.error.occured <- FALSE
+  tryCatch(
+           {
+             fit.res <-
+               nlsLM(
+                 #death.norm ~ my.inv.logit(Asym)/(1 + exp(nu) * exp((xmid - time)/scal))^(1 / exp(nu)),
+                 death.norm ~ Asym / (1 + exp(nu) * exp((xmid - time) / scal)) ^
+                   (1 / exp(nu)),
+                 data = death.country,
+                 start = list(
+                   Asym = Asym0,
+                   xmid = xmid0,
+                   scal = scal0,
+                   nu = nu0
+                 ),
+                 control = nls.lm.control(maxiter = 1024, maxfev = 20000),
+                 model = TRUE
+               )
+           },
+           error = function(e) {an.error.occured <<- TRUE}
+           )
 
-  ### modify the values to have better rendering in ggplot graphics
-  death.country <- adjust.confint.4plot(l.u.int = l.u.int,
-                                        death.country = death.country,
-                                        y.lim.max = y.lim.max)
+  cat("nlsLM failed: ", an.error.occured, "\n")
+
+  death.country <- add.extra.date(
+  death.country = death.country,
+  max.date.pred = max.date.pred,
+  min.time = min.time,
+  nb.obs = 20
+  )
+
+  if(! an.error.occured)
+  {
+      Asym <- coef(fit.res)["Asym.Asym"]
+      xmid <- coef(fit.res)["xmid.xmid"]
+      scal <- coef(fit.res)["scal.scal"]
+      nu <- coef(fit.res)["nu.nu"]
+      #cat("\tAsym: ", my.inv.logit(Asym), " xmid: ", xmid, " scal: ", scal, "nu: ", nu, "\n")
+      cat("\tAsym: ", Asym, " xmid: ", xmid, " scal: ", scal, "nu: ", nu, "\n")
+      
+      death.country$prediction.norm <-
+        #my.inv.logit(Asym)/(1 + exp(nu) * exp((xmid - death.country$time)/scal))^(1 / exp(nu))
+        Asym / (1 + exp(nu) * exp((xmid - death.country$time) / scal)) ^
+        (1 / exp(nu))
+      
+      ### confidence intervals for the parameters
+      confint.value <- as.matrix(confint2(fit.res))
+      confint.pic.value <-
+        min(daily.cumulative.death$date) + floor(confint.value["xmid.xmid", ]) + 1
+      pic.value <-
+        min(daily.cumulative.death$date) + floor(xmid) + 1
+      
+      confint.list <-
+        list(confint = confint.value,
+             confint.pic = confint.pic.value,
+             pic.value = pic.value)
+      
+      ### confidence intervals for the predicted values
+      l.u.int <- compute.confint(fit.res.nls = fit.res,
+                                 death.country = death.country)
+      
+      ### inverse value to population size
+      death.country$prediction <-
+        norm.pop.size.inv(value = death.country$prediction.norm,
+                          population.size = population.size)
+      l.u.int$lower <- norm.pop.size.inv(value = l.u.int$lower,
+                                         population.size = population.size)
+      l.u.int$upper <- norm.pop.size.inv(value = l.u.int$upper,
+                                         population.size = population.size)
+      
+      l.u.int$upper[1:nb.obs] <- l.u.int$lower[1:nb.obs] <- NA
+
+      ### modify the values to have better rendering in ggplot graphics
+      death.country <- adjust.confint.4plot(l.u.int = l.u.int,
+                                            death.country = death.country,
+                                            y.lim.max = y.lim.max)
+  }
+  else
+  {
+      death.country <- data.frame(death.country,
+                                  prediction.norm = NA,
+                                  prediction = NA,
+                                  lower = NA,
+                                  upper = NA,
+                                  stringsAsFactors = FALSE)
+      confint.list <-
+        list(confint = NA,
+             confint.pic = NA,
+             pic.value = max(daily.cumulative.death$date) )
+  }
 
   return(list(death.country = death.country,
               confint.list = confint.list))
