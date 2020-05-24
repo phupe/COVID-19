@@ -451,7 +451,7 @@ plot.prediction.norm <- function(death.prediction = NULL,
   
   p.prediction.norm <-
     p.prediction.norm + scale_y_continuous(n.breaks = 15,
-                                           limits = c(0, 700))
+                                           limits = c(0, 900))
   
   p.prediction.norm <-
     p.prediction.norm + aes(color = country, fill = country)
