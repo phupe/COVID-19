@@ -150,7 +150,7 @@ usa.countries.of.interest <- usa.top.countries
 
 y.lim.max <- 120000
 usa.y.lim.max <- 50000
-max.date.pred <- as.Date("05/31/20", format = "%m/%d/%y")
+max.date.pred <- as.Date("06/30/20", format = "%m/%d/%y")
 
 ###################################
 ### prediction model (world)
