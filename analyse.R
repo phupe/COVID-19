@@ -128,7 +128,7 @@ rownames(confinement.date) <- confinement.date$country
 ### World
 ############
 
-nb.countries <- 30
+nb.countries <- 20
 
 ### Top countries
 top.countries <- total.death$country[1:nb.countries]
