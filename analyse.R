@@ -148,9 +148,9 @@ usa.top.countries <- usa.total.death$country[1:nb.countries]
 ### USA states of interest
 usa.countries.of.interest <- usa.top.countries
 
-y.lim.max <- 220000
+y.lim.max <- 260000
 usa.y.lim.max <- 50000
-max.date.pred <- as.Date("11/15/20", format = "%m/%d/%y")
+max.date.pred <- as.Date("11/30/20", format = "%m/%d/%y")
 
 ###################################
 ### prediction model (world)
